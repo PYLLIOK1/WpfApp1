@@ -54,7 +54,7 @@ namespace WpfApp1
                     }
                 }
             }
-        }
+        }//выбор таблицы и парсинг её
         private static UserCredential Stream(String[] Scopes)
         {
             using (var stream =
@@ -151,10 +151,11 @@ namespace WpfApp1
                 Requests = requests
             };
             service.Spreadsheets.BatchUpdate(busr, spreadsheetId).Execute();
-        }
+        } //загружает данные в гугл таблицу
 
         private void DownloadMenu(object sender, RoutedEventArgs e)
         {
+            bool flag = false;
             string xls = "xls";
             WebClient client = new WebClient() { Encoding = Encoding.UTF8 };
             string s = client.DownloadString("https://vk.com/lunch_vesta");
@@ -166,36 +167,38 @@ namespace WpfApp1
             {
                 foreach (HtmlNode n in c)
                 {
-                    if (n.InnerHtml.Contains(xls))
+                    if ((n.InnerHtml.Contains(xls)) && (n.InnerText.Contains(DateTime.Today.ToShortDateString())))
                     {
                         string text = n.InnerHtml;
                         HtmlDocument docc = new HtmlDocument();
                         docc.LoadHtml(text);
-                        HtmlNodeCollection date = docc.DocumentNode.SelectNodes("//span[@class='medias_link_labeled medias_link_title']");
-                        foreach (HtmlNode atri in date)
+                        HtmlNodeCollection a = docc.DocumentNode.SelectNodes("//a[@class='mr_label medias_link']");
+                        foreach (HtmlNode atribute in a)
                         {
-                            if (atri.InnerText.Contains(DateTime.Today.ToShortDateString()))
+                            if (atribute.Attributes["href"] != null)
                             {
-                                HtmlNodeCollection a = docc.DocumentNode.SelectNodes("//a[@class='mr_label medias_link']");
-                                foreach (HtmlNode atribute in a)
-                                {
-                                    if (atribute.Attributes["href"] != null)
-                                    {
-                                        s = main + atribute.Attributes["href"].Value;
-                                        browser.FrameLoadEnd += Browser_FrameLoadEnd;
-                                        browser.Address = s;
-                                    }
-                                }
+                                s = main + atribute.Attributes["href"].Value;
+                                browser.FrameLoadEnd += Browser_FrameLoadEnd;
+                                browser.Address = s;
+                                flag = true;
+                                break;
                             }
                         }
                     }
+
                 }
             }
             else
             {
                 MessageBox.Show("не удалось найти");
             }
-        }
+            if (flag == true) { }
+            else
+            {
+                MessageBox.Show("не удалось найти");
+            }
+
+        } // парсинг вк группы 
 
         private void Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
@@ -203,33 +206,34 @@ namespace WpfApp1
             {
                 browser.DownloadHandler = new DownloadHandler();
                 browser.ExecuteScriptAsync("saveDoc();");
+                //Таблицу сохраняет где находится исполняемый файл
             }
         }
     }
-        public class DownloadHandler : IDownloadHandler
+    public class DownloadHandler : IDownloadHandler
+    {
+        public event EventHandler<DownloadItem> OnBeforeDownloadFired;
+
+        public event EventHandler<DownloadItem> OnDownloadUpdatedFired;
+
+        public void OnBeforeDownload(IBrowser browser, DownloadItem downloadItem, IBeforeDownloadCallback callback)
         {
-            public event EventHandler<DownloadItem> OnBeforeDownloadFired;
-
-            public event EventHandler<DownloadItem> OnDownloadUpdatedFired;
-
-            public void OnBeforeDownload(IBrowser browser, DownloadItem downloadItem, IBeforeDownloadCallback callback)
-            {
             OnBeforeDownloadFired?.Invoke(this, downloadItem);
 
             if (!callback.IsDisposed)
+            {
+                using (callback)
                 {
-                    using (callback)
-                    {
-                        callback.Continue(downloadItem.SuggestedFileName, showDialog: false);
-                    }
+                    callback.Continue(downloadItem.SuggestedFileName, showDialog: false);
                 }
             }
+        }
 
-            public void OnDownloadUpdated(IBrowser browser, DownloadItem downloadItem, IDownloadItemCallback callback)
-            {
+        public void OnDownloadUpdated(IBrowser browser, DownloadItem downloadItem, IDownloadItemCallback callback)
+        {
             OnDownloadUpdatedFired?.Invoke(this, downloadItem);
         }
-        }
+    }
     public class Parse
     {
         public string Name { get; set; }

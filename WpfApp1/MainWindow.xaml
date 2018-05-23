@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid HorizontalAlignment="Left" Width="790">
-        <Button Content="Выбрать Файл" HorizontalAlignment="Left" Margin="10,84,0,0" VerticalAlignment="Top" Width="121" Click="AddFile"/>
+        <Button Content="Выбрать таблицу" HorizontalAlignment="Left" Margin="10,84,0,0" VerticalAlignment="Top" Width="121" Click="AddFile"/>
         <Button Content="Добавить меню" HorizontalAlignment="Left" Margin="148,84,0,0" VerticalAlignment="Top" Width="120" Click="AddMenu"/>
         <Button Content="Скачать меню" HorizontalAlignment="Left" Margin="10,121,0,0" VerticalAlignment="Top" Width="258" Click="DownloadMenu"/>
         <cefSharp:ChromiumWebBrowser  Grid.Row="0" Height="600" Width="600" Address="" x:Name="browser"/>
