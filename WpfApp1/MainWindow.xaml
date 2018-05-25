@@ -6,11 +6,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid HorizontalAlignment="Left" Width="790">
-        <Button Content="Выбрать таблицу" HorizontalAlignment="Left" Margin="10,84,0,0" VerticalAlignment="Top" Width="121" Click="AddFile"/>
-        <Button Content="Добавить меню" HorizontalAlignment="Left" Margin="148,84,0,0" VerticalAlignment="Top" Width="120" Click="AddMenu"/>
-        <Button Content="Скачать меню" HorizontalAlignment="Left" Margin="10,121,0,0" VerticalAlignment="Top" Width="258" Click="DownloadMenu"/>
-        <cefSharp:ChromiumWebBrowser  Grid.Row="0" Height="600" Width="600" Address="" x:Name="browser"/>
+        Title="Меню на сегодня" Height="117.698" Width="290.616">
+    <Grid HorizontalAlignment="Left" Width="275">
+        <Button Content="Выбрать таблицу" HorizontalAlignment="Left" Margin="10,14,0,0" VerticalAlignment="Top" Width="121" Click="AddFile"/>
+        <Button Content="Добавить меню" HorizontalAlignment="Left" Margin="148,14,0,0" VerticalAlignment="Top" Width="120" Click="AddMenu"/>
+        <Button Content="Скачать меню" HorizontalAlignment="Left" Margin="10,51,0,0" VerticalAlignment="Top" Width="258" Click="DownloadMenu"/>
+        <cefSharp:ChromiumWebBrowser  Grid.Row="0" Height="1" Width="1" Address="" x:Name="browser"/>
     </Grid>
 </Window>
