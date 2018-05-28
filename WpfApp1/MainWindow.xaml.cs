@@ -59,26 +59,6 @@ namespace WpfApp1
             }
         }//выбор таблицы
 
-        private static UserCredential Stream(String[] Scopes)
-        {
-            using (var stream =
-                 new FileStream("client_secret.json", FileMode.Open, FileAccess.Read))
-            {
-                UserCredential credential;
-                string credPath = Environment.GetFolderPath(
-                    Environment.SpecialFolder.Personal);
-                credPath = System.IO.Path.Combine(credPath, ".credentials/sheets.googleapis.com-dotnet-quickstart.json");
-
-                credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    GoogleClientSecrets.Load(stream).Secrets,
-                    Scopes,
-                    "user",
-                    CancellationToken.None,
-                    new FileDataStore(credPath, true)).Result;
-                return credential;
-            }
-        }
-
         public void Add()
         {
             string[] Scopes = { SheetsService.Scope.Spreadsheets };
@@ -113,7 +93,7 @@ namespace WpfApp1
                 for (int i = 0; i < 900; i++)
                 {
                     List<CellData> Valurrr = new List<CellData>();
-                    for (int j = 0; j < 2; j++)
+                    for (int j = 0; j < 3; j++)
                     {
                         Valurrr.Add(new CellData { UserEnteredValue = new ExtendedValue { StringValue = "" } });
                     }
@@ -230,7 +210,6 @@ namespace WpfApp1
             {
                 browser.DownloadHandler = new DownloadHandler();
                 browser.ExecuteScriptAsync("saveDoc();");
-                browser.FrameLoadEnd -= Browser_FrameLoadEnd;
                 //Таблицу сохраняет где находится исполняемый файл
             }
         }
@@ -254,7 +233,6 @@ namespace WpfApp1
                 using (callback)
                 {
                     callback.Continue(downloadItem.SuggestedFileName, showDialog: false);
-                    callback.Dispose();
                 }
             }
         }
@@ -283,6 +261,3 @@ namespace WpfApp1
         public string Price { get; set; }
     }
 }
-
-
-
