@@ -29,10 +29,11 @@ namespace WpfApp1
             InitializeComponent();
         }
         public const string main = "https://vk.com";
-        private List<Parse> Liste = new List<Parse>();
-        public void Pars(OpenFileDialog dialog)
+        //private List<Parse> Liste = new List<Parse>();
+        public List<Parse> Pars(OpenFileDialog dialog)
         {
             HSSFWorkbook hssfwb;
+            List<Parse> Liste = new List<Parse>();
             using (FileStream file = new FileStream(dialog.FileName, FileMode.Open, FileAccess.Read))
             {
                 hssfwb = new HSSFWorkbook(file);
@@ -49,22 +50,26 @@ namespace WpfApp1
                     }
                 }
             }
+            return Liste;
         }// парсинг таблицы
         private void AddFile(object sender, RoutedEventArgs e)
         {
-            Liste.Clear();
+            List<Parse> Liste = new List<Parse>();
             OpenFileDialog dialog = new OpenFileDialog();
             if (dialog.ShowDialog() == true)
             {
-                Pars(dialog);
+                Liste = Pars(dialog);
+                Add(Liste);
             }
+            
         }//выбор таблицы
 
-        public void Add()
+        public void Add(List<Parse> Liste)
         {
             string[] Scopes = { SheetsService.Scope.Spreadsheets };
             String spreadsheetId = "1IUrDULP4pzI8kioVAcl_5f1-B8mFdaahjuj8qwVe5dA";
             string AppName = "WpfApp1";
+            
             using (var stream =
                  new FileStream("client_secret.json", FileMode.Open, FileAccess.Read))
             {
@@ -145,13 +150,9 @@ namespace WpfApp1
                 new CellData { UserEnteredValue = new ExtendedValue { FormulaValue = "=SUM(D2:2)" } }
             };
                 service.Spreadsheets.BatchUpdate(busrer, spreadsheetId).Execute();
+                MessageBox.Show("Выполнено");
             }
         }
-
-        private void AddMenu(object sender, RoutedEventArgs e)
-        {
-            Add();
-        } //загружает данные в гугл таблицу
 
         private void DownloadMenu(object sender, RoutedEventArgs e)
         {
@@ -210,8 +211,6 @@ namespace WpfApp1
     public class DownloadHandler : IDownloadHandler
     {
 
-        private List<Parse> Liste = new List<Parse>();
-
         public event EventHandler<DownloadItem> OnBeforeDownloadFired;
 
         public event EventHandler<DownloadItem> OnDownloadUpdatedFired;
@@ -235,15 +234,14 @@ namespace WpfApp1
             OnDownloadUpdatedFired?.Invoke(this, downloadItem);
             if (downloadItem.IsComplete)
             {
-                Liste.Clear();
+                List<Parse> Liste = new List<Parse>();
                 OpenFileDialog file = new OpenFileDialog
                 {
                     FileName = downloadItem.FullPath
                 };
                 MainWindow main = new MainWindow();
-                main.Pars(file);
-                main.Add();
-                MessageBox.Show("Выполнено");
+                Liste = main.Pars(file);
+                main.Add(Liste);
                 File.Delete(downloadItem.FullPath);
             }
         }
