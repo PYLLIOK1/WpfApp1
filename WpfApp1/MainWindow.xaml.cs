@@ -15,6 +15,7 @@ using System.Net;
 using HtmlAgilityPack;
 using System.Text;
 using CefSharp;
+using System.Linq;
 
 namespace WpfApp1
 {
@@ -70,7 +71,7 @@ namespace WpfApp1
                 UserCredential credential;
                 string credPath = Environment.GetFolderPath(
                     Environment.SpecialFolder.Personal);
-                credPath = System.IO.Path.Combine(credPath, ".credentials/sheets.googleapis.com-dotnet-quickstart.json");
+                credPath = Path.Combine(credPath, ".credentials/sheets.googleapis.com-dotnet-quickstart.json");
 
                 credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                     GoogleClientSecrets.Load(stream).Secrets,
@@ -84,33 +85,33 @@ namespace WpfApp1
                     HttpClientInitializer = credential,
                     ApplicationName = AppName
                 });
+                SpreadsheetsResource.GetRequest request = service.Spreadsheets.Get(spreadsheetId);
+                var response = request.Execute();
+                var sheet = response.Sheets.FirstOrDefault(x => Convert.ToBoolean(x.Properties.GridProperties.RowCount));
                 List<Request> requests = new List<Request>();
-                List<Request> reques = new List<Request>();
                 BatchUpdateSpreadsheetRequest busrer = new BatchUpdateSpreadsheetRequest
                 {
-                    Requests = reques
+                    Requests = requests
                 };
-                for (int i = 0; i < 900; i++)
+                for (int i = 4; i < sheet.Properties.GridProperties.RowCount; i++)
                 {
-                    List<CellData> Valurrr = new List<CellData>();
-                    for (int j = 0; j < 3; j++)
+                    List<CellData> Valurrr = new List<CellData>
                     {
-                        Valurrr.Add(new CellData { UserEnteredValue = new ExtendedValue { StringValue = "" } });
-                    }
-                    reques.Add(new Request { UpdateCells = new UpdateCellsRequest { Start = new GridCoordinate { SheetId = 0, RowIndex = i + 4, ColumnIndex = 0 }, Rows = new List<RowData> { new RowData { Values = Valurrr } }, Fields = "userEnteredValue" } });
+                        new CellData { UserEnteredValue = new ExtendedValue { StringValue = "" } },
+                        new CellData { UserEnteredValue = new ExtendedValue { StringValue = "" } },
+                        new CellData { UserEnteredValue = new ExtendedValue { StringValue = "" } }
+                    };
+                    requests.Add(new Request { UpdateCells = new UpdateCellsRequest { Start = new GridCoordinate { SheetId = 0, RowIndex = i, ColumnIndex = 0 }, Rows = new List<RowData> { new RowData { Values = Valurrr } }, Fields = "userEnteredValue" } });
                 }
-                service.Spreadsheets.BatchUpdate(busrer, spreadsheetId).Execute();
-                for (int i = 0; i < Liste.Count; i++)
+                for (int i = 4; i < Liste.Count; i++)
                 {
-                    List<CellData> Value = new List<CellData>();
-                    for (int j = 0; j < 3; j++)
+                    List<CellData> Value = new List<CellData>
                     {
-
-                        if (j == 0) Value.Add(new CellData { UserEnteredValue = new ExtendedValue { StringValue = Liste[i].Name, } });
-                        if (j == 1) Value.Add(new CellData { UserEnteredValue = new ExtendedValue { StringValue = Liste[i].Price } });
-                        if (j == 2) Value.Add(new CellData { UserEnteredValue = new ExtendedValue { FormulaValue = "=SUM(D" + (i + 5) + ":" + (i + 5) + ")" } });
-                    }
-                    requests.Add(new Request { UpdateCells = new UpdateCellsRequest { Start = new GridCoordinate { SheetId = 0, RowIndex = i + 4, ColumnIndex = 0 }, Rows = new List<RowData> { new RowData { Values = Value } }, Fields = "userEnteredValue" } });
+                        new CellData { UserEnteredValue = new ExtendedValue { StringValue = Liste[i].Name, } },
+                        new CellData { UserEnteredValue = new ExtendedValue { StringValue = Liste[i].Price } },
+                        new CellData { UserEnteredValue = new ExtendedValue { FormulaValue = "=SUM(D" + (i + 5) + ":" + (i + 5) + ")" } }
+                    };
+                    requests.Add(new Request { UpdateCells = new UpdateCellsRequest { Start = new GridCoordinate { SheetId = 0, RowIndex = i, ColumnIndex = 0 }, Rows = new List<RowData> { new RowData { Values = Value } }, Fields = "userEnteredValue" } });
                 }
                 List<CellData> Cash = new List<CellData>();
                 for (char c = 'D'; c <= 'Z'; c++)
@@ -143,12 +144,7 @@ namespace WpfApp1
             {
                 new CellData { UserEnteredValue = new ExtendedValue { FormulaValue = "=SUM(D2:2)" } }
             };
-                requests.Add(new Request { UpdateCells = new UpdateCellsRequest { Start = new GridCoordinate { SheetId = 0, RowIndex = 1, ColumnIndex = 2 }, Rows = new List<RowData> { new RowData { Values = SumFormula } }, Fields = "userEnteredValue" } });
-                BatchUpdateSpreadsheetRequest busr = new BatchUpdateSpreadsheetRequest
-                {
-                    Requests = requests
-                };
-                service.Spreadsheets.BatchUpdate(busr, spreadsheetId).Execute();
+                service.Spreadsheets.BatchUpdate(busrer, spreadsheetId).Execute();
             }
         }
 
@@ -176,12 +172,11 @@ namespace WpfApp1
                         string text = n.InnerHtml;
                         HtmlDocument docc = new HtmlDocument();
                         docc.LoadHtml(text);
-                        HtmlNodeCollection a = docc.DocumentNode.SelectNodes("//a[@class='mr_label medias_link']");
-                        foreach (HtmlNode atribute in a)
+                        HtmlNode a = docc.DocumentNode.SelectSingleNode("//a[@class='mr_label medias_link']");
                         {
-                            if (atribute.Attributes["href"] != null)
+                            if (a.Attributes["href"] != null)
                             {
-                                s = main + atribute.Attributes["href"].Value;
+                                s = main + a.Attributes["href"].Value;
                                 browser.FrameLoadEnd += Browser_FrameLoadEnd;
                                 browser.Address = s;
                                 flag = true;
@@ -189,15 +184,13 @@ namespace WpfApp1
                             }
                         }
                     }
-
                 }
             }
             else
             {
                 MessageBox.Show("не удалось найти");
             }
-            if (flag == true) { }
-            else
+            if (!flag)
             {
                 MessageBox.Show("не удалось найти");
             }
